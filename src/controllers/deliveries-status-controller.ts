@@ -10,8 +10,12 @@ class DeliveriesStatusController {
       id: z.string().uuid()
     });
 
+    const bodySchema = z.object({
+      status: z.enum(["processing", "shipped", "delivered"])
+    });
+
     const { id } = paramsSchema.parse(request.params);
-    const delivery = await prisma.delivery.findFirst({
+    const delivery = await prisma.delivery.findUnique({
       where : {
         id
       }
@@ -21,11 +25,7 @@ class DeliveriesStatusController {
       throw new AppError('Delivery is already delivered');
     } 
 
-    const bodySchema = z.object({
-      status: z.enum(["processing", "shipped", "delivered"])
-    });
     const { status } = bodySchema.parse(request.body);
-
     await prisma.delivery.update({
       data: {
         status
